@@ -5,13 +5,20 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,7 +34,9 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.tipcalculator.components.InputField
+import com.example.tipcalculator.widgets.RoundIconButton
 
 @Composable
 fun TipCalculatorUI( content:@Composable () -> Unit = {}) {
@@ -96,6 +105,8 @@ fun BillForm(modifier:Modifier = Modifier,
         totalBillState.value.trim().isNotEmpty()
     }
 
+    val dummyText = remember {mutableStateOf("")}
+
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Surface(
@@ -106,7 +117,12 @@ fun BillForm(modifier:Modifier = Modifier,
         border = BorderStroke(width = 3.dp, color = Color.LightGray)
     ) {
 
-        Column() {
+        Column(
+            modifier = Modifier
+                .padding(6.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start
+        ) {
 
             InputField(
                 valueState = totalBillState ,
@@ -121,9 +137,47 @@ fun BillForm(modifier:Modifier = Modifier,
             )
             if(validState) {
 
-                Text(text = "Valid")
+                Row(
+                    modifier = Modifier
+                        .padding(3.dp),
+                    horizontalArrangement = Arrangement.Start
 
-            } else {Box()}
+                ) {
+                    Text(
+                        text = "Split",
+                        modifier = Modifier
+                        .align(
+                            alignment = Alignment.CenterVertically
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.width(120.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 3.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+
+                        RoundIconButton(
+                            imageVector = Icons.Default.Remove,
+                            onClick = { dummyText.value = "Removed" }
+                        )
+
+                        Text(text = "${dummyText.value}", fontSize = 8.sp)
+
+                        RoundIconButton(
+                            imageVector = Icons.Default.Add,
+                            onClick = { dummyText.value = "Added" }
+                        )
+
+                    }
+
+                }
+
+
+
+            } else {Box{}}
 
 
         }
