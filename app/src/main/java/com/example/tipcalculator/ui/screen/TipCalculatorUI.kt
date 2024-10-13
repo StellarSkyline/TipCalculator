@@ -1,7 +1,9 @@
 package com.example.tipcalculator.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,7 +38,8 @@ fun TipCalculatorUI( content:@Composable () -> Unit = {}) {
             .fillMaxSize()
             .padding(top = 35.dp, start = 8.dp, end = 8.dp)
     ) {
-        TopHeader()
+        //TopHeader()
+        MainContent()
     }
 }
 
@@ -72,8 +75,22 @@ fun TopHeader(totalPerPerson: Double = 0.0, updateTotal: (Double) -> (Unit) = {}
 }
 
 @Composable
-@Preview
 fun MainContent() {
+
+    BillForm() { billAmt ->
+        Log.d("STLOG", "${billAmt.toInt() * 100}")
+    }
+
+
+
+}
+
+@Composable
+@Preview
+fun BillForm(modifier:Modifier = Modifier,
+             onValChanged: (String) -> (Unit) = {}
+             ) {
+
     val totalBillState = remember{mutableStateOf("")}
     val validState = remember(totalBillState.value){
         totalBillState.value.trim().isNotEmpty()
@@ -91,19 +108,26 @@ fun MainContent() {
 
         Column() {
 
-            InputField(valueState = totalBillState ,
+            InputField(
+                valueState = totalBillState ,
                 labelId = "Enter Bill",
                 enabled = true,
                 isSingleLine = true,
                 onAction = KeyboardActions{
                     if(!validState) return@KeyboardActions
-                    //TODO - onvalue changed
-
+                    onValChanged(totalBillState.value.trim())
                     keyboardController?.hide()
                 }
             )
+            if(validState) {
+
+                Text(text = "Valid")
+
+            } else {Box()}
+
 
         }
 
     }
+
 }
