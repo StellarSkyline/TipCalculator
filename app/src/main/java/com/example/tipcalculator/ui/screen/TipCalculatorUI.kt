@@ -3,7 +3,6 @@ package com.example.tipcalculator.ui.screen
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,12 +17,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -39,9 +37,9 @@ import com.example.tipcalculator.components.InputField
 import com.example.tipcalculator.widgets.RoundIconButton
 
 @Composable
-fun TipCalculatorUI( content:@Composable () -> Unit = {}) {
-    val totalPerPerson =  remember { mutableStateOf(0.0) }
-    val totalBil = remember{ mutableStateOf(0.0) }
+fun TipCalculatorUI(content: @Composable () -> Unit = {}) {
+    val totalPerPerson = remember { mutableStateOf(0.0) }
+    val totalBil = remember { mutableStateOf(0.0) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -90,22 +88,22 @@ fun MainContent() {
         Log.d("STLOG", "${billAmt.toInt() * 100}")
     }
 
-
-
 }
 
 @Composable
 @Preview
-fun BillForm(modifier:Modifier = Modifier,
-             onValChanged: (String) -> (Unit) = {}
-             ) {
+fun BillForm(
+    modifier: Modifier = Modifier,
+    onValChanged: (String) -> (Unit) = {}
+) {
 
-    val totalBillState = remember{mutableStateOf("")}
-    val validState = remember(totalBillState.value){
+    val totalBillState = remember { mutableStateOf("") }
+    val validState = remember(totalBillState.value) {
         totalBillState.value.trim().isNotEmpty()
     }
 
-    val dummyText = remember {mutableStateOf("")}
+    val person = remember { mutableStateOf(1) }
+    val sliderPositionState = remember {mutableStateOf(0f)}
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -125,59 +123,114 @@ fun BillForm(modifier:Modifier = Modifier,
         ) {
 
             InputField(
-                valueState = totalBillState ,
+                valueState = totalBillState,
                 labelId = "Enter Bill",
                 enabled = true,
                 isSingleLine = true,
-                onAction = KeyboardActions{
-                    if(!validState) return@KeyboardActions
+                onAction = KeyboardActions {
+                    if (!validState) return@KeyboardActions
                     onValChanged(totalBillState.value.trim())
                     keyboardController?.hide()
                 }
             )
-            if(validState) {
+
+            Row(
+                modifier = Modifier
+                    .padding(3.dp),
+                horizontalArrangement = Arrangement.Start
+
+            ) {
+                Text(
+                    text = "Split",
+                    modifier = Modifier
+                        .align(
+                            alignment = Alignment.CenterVertically
+                        ),
+                    fontSize = 20.sp
+                )
+
+                Spacer(modifier = Modifier.width(120.dp))
 
                 Row(
                     modifier = Modifier
-                        .padding(3.dp),
-                    horizontalArrangement = Arrangement.Start
-
+                        .padding(horizontal = 3.dp),
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    Text(
-                        text = "Split",
-                        modifier = Modifier
-                        .align(
-                            alignment = Alignment.CenterVertically
-                        )
+
+                    RoundIconButton(
+                        imageVector = Icons.Default.Remove,
+                        onClick = {
+                            if (person.value > 1) person.value -= 1
+                            else person.value = 1
+                        }
                     )
 
-                    Spacer(modifier = Modifier.width(120.dp))
-
-                    Row(
+                    Text(
                         modifier = Modifier
-                            .padding(horizontal = 3.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
+                            .align(Alignment.CenterVertically)
+                            .padding(start = 9.dp, end = 9.dp),
+                        text = "${person.value}",
+                        fontSize = 20.sp
+                    )
 
-                        RoundIconButton(
-                            imageVector = Icons.Default.Remove,
-                            onClick = { dummyText.value = "Removed" }
-                        )
-
-                        Text(text = "${dummyText.value}", fontSize = 8.sp)
-
-                        RoundIconButton(
-                            imageVector = Icons.Default.Add,
-                            onClick = { dummyText.value = "Added" }
-                        )
-
-                    }
+                    RoundIconButton(
+                        imageVector = Icons.Default.Add,
+                        onClick = { person.value += 1 }
+                    )
 
                 }
 
+            }
 
+            //Tip Row
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 3.dp, vertical = 12.dp)
+            )
+            {
 
-            } else {Box{}}
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(start = 3.dp),
+                    text = "Tip",
+                    fontSize = 20.sp
+                )
+
+                Spacer(
+                    modifier = Modifier
+                        .width(180.dp)
+                )
+
+                Text(
+                    text = "33%",
+                    fontSize = 20.sp
+
+                )
+
+            }
+
+            //Tip and Slider
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Text("33%",
+                    fontSize = 20.sp)
+
+                Spacer(modifier = Modifier.height(10.dp))
+                
+                //Slider
+                Slider(value = sliderPositionState.value, onValueChange = { newVal ->
+
+                    sliderPositionState.value = newVal
+
+                    Log.d("STLog", "Slider: $newVal")
+
+                })
+
+            }
 
 
         }
