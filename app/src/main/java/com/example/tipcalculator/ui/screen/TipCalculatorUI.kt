@@ -23,6 +23,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -48,7 +49,6 @@ fun TipCalculatorUI(content: @Composable () -> Unit = {}) {
             .fillMaxSize()
             .padding(top = 35.dp, start = 8.dp, end = 8.dp)
     ) {
-        //TopHeader()
         MainContent()
     }
 }
@@ -87,15 +87,23 @@ fun TopHeader(totalPerPerson: Double = 0.0, updateTotal: (Double) -> (Unit) = {}
 
 @Composable
 fun MainContent() {
-    BillForm() { billAmt ->
-        Log.d("STLOG", "${billAmt.toInt() * 100}")
-    }
+    val splitByState = remember { mutableStateOf(1) }
+    val totalPerPersonState = remember {mutableStateOf(0.0)}
+    val tipAmmountState = remember { mutableStateOf(0.0) }
+    BillForm(
+        splitByState = splitByState,
+        tipAmmountState = tipAmmountState,
+        totalPerPersonState = totalPerPersonState
+    )
 }
 
 @Composable
 @Preview
 fun BillForm(
     modifier: Modifier = Modifier,
+    splitByState:MutableState<Int> = mutableStateOf(0),
+    tipAmmountState:MutableState<Double> = mutableStateOf(0.0),
+    totalPerPersonState:MutableState<Double> = mutableStateOf(0.0),
     onValChanged: (String) -> (Unit) = {}
 ) {
     //States
@@ -103,11 +111,11 @@ fun BillForm(
     val validState = remember(totalBillState.value) {
         totalBillState.value.trim().isNotEmpty()
     }
-    val person = remember { mutableStateOf(1) }
+
     val sliderPositionState = remember { mutableStateOf(0f) }
     val tipPercentage = (sliderPositionState.value * 100).toInt()
-    val tipAmmountState = remember { mutableStateOf(0.0) }
-    val totalPerPersonState = remember {mutableStateOf(0.0)}
+
+
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -167,11 +175,11 @@ fun BillForm(
                         RoundIconButton(
                             imageVector = Icons.Default.Remove,
                             onClick = {
-                                if (person.value > 1) person.value -= 1 else person.value = 1
+                                if (splitByState.value > 1) splitByState.value -= 1 else splitByState.value = 1
 
                                 totalPerPersonState.value =
                                     calculateTotalPerPerson(totalBill = totalBillState.value.toDouble(),
-                                        splitBy = person.value,
+                                        splitBy = splitByState.value,
                                         tipPercent = tipPercentage)
                             }
                         )
@@ -180,17 +188,17 @@ fun BillForm(
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                                 .padding(start = 9.dp, end = 9.dp),
-                            text = "${person.value}",
+                            text = "${splitByState.value}",
                             fontSize = 20.sp
                         )
 
                         RoundIconButton(
                             imageVector = Icons.Default.Add,
                             onClick = {
-                                person.value += 1
+                                splitByState.value += 1
                                 totalPerPersonState.value =
                                     calculateTotalPerPerson(totalBill = totalBillState.value.toDouble(),
-                                        splitBy = person.value,
+                                        splitBy = splitByState.value,
                                         tipPercent = tipPercentage)
                             }
                         )
@@ -253,7 +261,7 @@ fun BillForm(
 
                             totalPerPersonState.value =
                                 calculateTotalPerPerson(totalBill = totalBillState.value.toDouble(),
-                                    splitBy = person.value,
+                                    splitBy = splitByState.value,
                                     tipPercent = tipPercentage)
 
                             Log.d("STLog", "Slider: $newVal")
